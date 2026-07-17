@@ -23,10 +23,18 @@ export interface PaginatedJobs {
   items: Job[];
 }
 
-export const getJobs = async (skip = 0, limit = 100, status = 'all'): Promise<PaginatedJobs> => {
-  const response = await apiClient.get<any>('/jobs', {
-    params: { skip, limit, status },
-  });
+export const getJobs = async (
+  skip = 0, 
+  limit = 100, 
+  status = 'all',
+  startDate?: string,
+  endDate?: string
+): Promise<PaginatedJobs> => {
+  const params: any = { skip, limit, status };
+  if (startDate) params.start_date = startDate;
+  if (endDate) params.end_date = endDate;
+
+  const response = await apiClient.get<any>('/jobs', { params });
 
   // Simple validation of API response shape
   if (!response.data || typeof response.data.total !== 'number' || !Array.isArray(response.data.items)) {

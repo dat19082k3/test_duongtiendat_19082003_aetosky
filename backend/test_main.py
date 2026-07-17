@@ -40,3 +40,18 @@ def test_get_job_not_found():
     with TestClient(app) as client:
         response = client.get("/jobs/invalid_job_id")
         assert response.status_code == 404
+
+def test_get_jobs_with_date_filter():
+    with TestClient(app) as client:
+        # Date range that covers some jobs (based on the generated seed data)
+        # Assuming seed data spans past months.
+        response = client.get("/jobs?start_date=2000-01-01T00:00:00&end_date=2050-12-31T23:59:59")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] > 0
+        
+        # Test an empty range
+        response_empty = client.get("/jobs?start_date=1990-01-01T00:00:00&end_date=1991-01-01T00:00:00")
+        assert response_empty.status_code == 200
+        data_empty = response_empty.json()
+        assert data_empty["total"] == 0

@@ -66,10 +66,22 @@ class PaginatedJobs(BaseModel):
     items: List[JobSchema]
 
 @app.get("/jobs", response_model=PaginatedJobs)
-def get_jobs(skip: int = 0, limit: int = 10, status: Optional[str] = None, db: Session = Depends(get_db)):
+def get_jobs(
+    skip: int = 0, 
+    limit: int = 10, 
+    status: Optional[str] = None, 
+    start_date: Optional[datetime.datetime] = None,
+    end_date: Optional[datetime.datetime] = None,
+    db: Session = Depends(get_db)
+):
     query = db.query(models.Job)
     if status and status.lower() != 'all':
         query = query.filter(models.Job.status == status.lower())
+    
+    if start_date:
+        query = query.filter(models.Job.created_at >= start_date)
+    if end_date:
+        query = query.filter(models.Job.created_at <= end_date)
     
     total = query.count()
     jobs = query.order_by(models.Job.created_at.desc()).offset(skip).limit(limit).all()

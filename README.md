@@ -54,6 +54,3 @@ Given more time outside the 90-minute timebox, here are the key improvements I w
 
 2. **Job Control Actions (Retry/Cancel):** 
    Add interactive APIs such as `POST /jobs/{id}/retry` to allow users to rerun a `failed` job directly from the detail view, or `POST /jobs/{id}/cancel` to forcefully terminate a stuck `running` job.
-
-3. **Advanced Filtering & Date Range:** 
-   Extend the backend and frontend to support filtering by `created_at` date ranges. In a real-world system where jobs grow to millions of records, filtering purely by status is not enough; users often need to investigate jobs that failed "in the last 24 hours".

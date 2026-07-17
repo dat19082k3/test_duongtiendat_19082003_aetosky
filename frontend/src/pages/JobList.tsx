@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Table, Typography, Card, Button, Alert, Tabs } from 'antd';
+import { Layout, Table, Typography, Card, Button, Alert, Tabs, DatePicker, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { getJobs, type Job } from '../api';
@@ -9,6 +9,7 @@ import '../App.css';
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
+const { RangePicker } = DatePicker;
 
 export const JobList: React.FC = () => {
   const navigate = useNavigate();
@@ -20,13 +21,15 @@ export const JobList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('all');
+  
+  const [dateRange, setDateRange] = useState<[string, string] | null>(null);
 
-  const fetchJobs = async (page: number, size: number, status: string) => {
+  const fetchJobs = async (page: number, size: number, status: string, dates: [string, string] | null) => {
     try {
       setLoading(true);
       setError(null);
       const skip = (page - 1) * size;
-      const data = await getJobs(skip, size, status);
+      const data = await getJobs(skip, size, status, dates?.[0], dates?.[1]);
       setJobs(data.items);
       setTotalJobs(data.total);
     } catch (err: any) {
@@ -37,8 +40,8 @@ export const JobList: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchJobs(currentPage, pageSize, activeTab);
-  }, [currentPage, pageSize, activeTab]);
+    fetchJobs(currentPage, pageSize, activeTab, dateRange);
+  }, [currentPage, pageSize, activeTab, dateRange]);
 
   const viewDetails = (job: Job) => {
     navigate(`/jobs/${job.id}`);
@@ -121,6 +124,16 @@ export const JobList: React.FC = () => {
               onChange={handleTabChange}
               items={tabItems}
               style={{ padding: '0 16px', flexShrink: 0 }}
+              tabBarExtraContent={
+                <RangePicker 
+                  showTime={{ format: 'HH:mm' }}
+                  format="YYYY-MM-DD HH:mm"
+                  onChange={(_, dateStrings) => {
+                    setDateRange(dateStrings && dateStrings[0] && dateStrings[1] ? [dateStrings[0], dateStrings[1]] : null);
+                    setCurrentPage(1);
+                  }}
+                />
+              }
             />
             <Table
               columns={columns}
