@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "setup": "npm install && cd frontend && npm install && cd ../backend && python3 -m venv venv && . venv/bin/activate && pip install -r requirements.txt",
     "dev:backend": "cd backend && . venv/bin/activate && uvicorn main:app --reload --port 8080",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev": "concurrently -c \"blue.bold,green.bold\" -n \"backend,frontend\" \"npm run dev:backend\" \"npm run dev:frontend\""
+    "dev": "concurrently -c \"blue.bold,green.bold\" -n \"backend,frontend\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "test:frontend": "cd frontend && npm run test",
+    "test:backend": "cd backend && . venv/bin/activate && pytest test_main.py",
+    "test": "npm run test:backend && npm run test:frontend"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
