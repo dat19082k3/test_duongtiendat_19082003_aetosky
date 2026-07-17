@@ -32,4 +32,23 @@ test.describe('Job List/Detail Flow', () => {
     await backBtn.click();
     await expect(page).toHaveURL(/\/jobs/);
   });
+
+  test('should handle server-side sorting', async ({ page }) => {
+    await page.goto('/jobs');
+    
+    // Wait for the table to load
+    await expect(page.locator('.ant-table')).toBeVisible({ timeout: 15000 });
+
+    // Click "Job ID" header to trigger sorting
+    const jobIdHeader = page.locator('th').filter({ hasText: 'Job ID' });
+    await jobIdHeader.click();
+
+    // Verify loading spinner appears and disappears
+    // Data will re-render, we just ensure no crash
+    await expect(page.locator('.ant-table-row').first()).toBeVisible();
+
+    // Click again to change sort order
+    await jobIdHeader.click();
+    await expect(page.locator('.ant-table-row').first()).toBeVisible();
+  });
 });

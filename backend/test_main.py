@@ -55,3 +55,19 @@ def test_get_jobs_with_date_filter():
         assert response_empty.status_code == 200
         data_empty = response_empty.json()
         assert data_empty["total"] == 0
+
+def test_get_jobs_with_sorting():
+    with TestClient(app) as client:
+        # Test sorting by id asc
+        response_asc = client.get("/jobs?sort_by=id&sort_order=asc&limit=5")
+        assert response_asc.status_code == 200
+        jobs_asc = response_asc.json()["items"]
+        assert len(jobs_asc) > 1
+        assert jobs_asc[0]["id"] <= jobs_asc[1]["id"]
+        
+        # Test sorting by id desc
+        response_desc = client.get("/jobs?sort_by=id&sort_order=desc&limit=5")
+        assert response_desc.status_code == 200
+        jobs_desc = response_desc.json()["items"]
+        assert len(jobs_desc) > 1
+        assert jobs_desc[0]["id"] >= jobs_desc[1]["id"]

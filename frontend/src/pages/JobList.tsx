@@ -23,13 +23,15 @@ export const JobList: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('all');
   
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
 
-  const fetchJobs = async (page: number, size: number, status: string, dates: [string, string] | null) => {
+  const fetchJobs = async (page: number, size: number, status: string, dates: [string, string] | null, sortF: string | null, sortD: string | null) => {
     try {
       setLoading(true);
       setError(null);
       const skip = (page - 1) * size;
-      const data = await getJobs(skip, size, status, dates?.[0], dates?.[1]);
+      const data = await getJobs(skip, size, status, dates?.[0], dates?.[1], sortF, sortD);
       setJobs(data.items);
       setTotalJobs(data.total);
     } catch (err: any) {
@@ -40,8 +42,8 @@ export const JobList: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchJobs(currentPage, pageSize, activeTab, dateRange);
-  }, [currentPage, pageSize, activeTab, dateRange]);
+    fetchJobs(currentPage, pageSize, activeTab, dateRange, sortBy, sortOrder);
+  }, [currentPage, pageSize, activeTab, dateRange, sortBy, sortOrder]);
 
   const viewDetails = (job: Job) => {
     navigate(`/jobs/${job.id}`);
@@ -52,6 +54,8 @@ export const JobList: React.FC = () => {
       title: 'Job ID',
       dataIndex: 'id',
       key: 'id',
+      sorter: true,
+      sortOrder: sortBy === 'id' ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null,
       render: (text) => <strong>{text}</strong>,
     },
     {
@@ -64,6 +68,8 @@ export const JobList: React.FC = () => {
       title: 'Created At',
       dataIndex: 'created_at',
       key: 'created_at',
+      sorter: true,
+      sortOrder: sortBy === 'created_at' ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null,
       render: (text) => dayjs(text).format('YYYY-MM-DD HH:mm:ss'),
     },
     {
@@ -88,6 +94,16 @@ export const JobList: React.FC = () => {
   const handleTabChange = (key: string) => {
     setActiveTab(key);
     setCurrentPage(1);
+  };
+
+  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+    if (sorter && sorter.order) {
+      setSortBy(sorter.columnKey);
+      setSortOrder(sorter.order === 'ascend' ? 'asc' : 'desc');
+    } else {
+      setSortBy(null);
+      setSortOrder(null);
+    }
   };
 
   return (
@@ -129,8 +145,16 @@ export const JobList: React.FC = () => {
                   showTime={{ format: 'HH:mm' }}
                   format="YYYY-MM-DD HH:mm"
                   onChange={(_, dateStrings) => {
-                    setDateRange(dateStrings && dateStrings[0] && dateStrings[1] ? [dateStrings[0], dateStrings[1]] : null);
+                    const hasValue = dateStrings && dateStrings[0] && dateStrings[1];
+                    setDateRange(hasValue ? [dateStrings[0], dateStrings[1]] : null);
                     setCurrentPage(1);
+                    if (hasValue) {
+                      setSortBy('created_at'); // Default sorter when time_range is selected
+                      setSortOrder('desc');
+                    } else {
+                      setSortBy(null); // Reset to default initial sorter when time_range is cleared
+                      setSortOrder(null);
+                    }
                   }}
                 />
               }
@@ -140,6 +164,7 @@ export const JobList: React.FC = () => {
               dataSource={jobs}
               rowKey="id"
               loading={loading}
+              onChange={handleTableChange}
               pagination={{ 
                 current: currentPage,
                 pageSize: pageSize,

@@ -72,6 +72,8 @@ def get_jobs(
     status: Optional[str] = None, 
     start_date: Optional[datetime.datetime] = None,
     end_date: Optional[datetime.datetime] = None,
+    sort_by: Optional[str] = None,
+    sort_order: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     query = db.query(models.Job)
@@ -84,7 +86,23 @@ def get_jobs(
         query = query.filter(models.Job.created_at <= end_date)
     
     total = query.count()
-    jobs = query.order_by(models.Job.created_at.desc()).offset(skip).limit(limit).all()
+
+    # Dynamic sorting
+    effective_sort_by = sort_by
+    effective_sort_order = sort_order
+
+    if not effective_sort_by:
+        effective_sort_by = "created_at" if (start_date or end_date) else "id"
+    if not effective_sort_order:
+        effective_sort_order = "desc" if (start_date or end_date) else "asc"
+
+    sort_column = getattr(models.Job, effective_sort_by, models.Job.created_at)
+    if effective_sort_order.lower() == "asc":
+        query = query.order_by(sort_column.asc())
+    else:
+        query = query.order_by(sort_column.desc())
+
+    jobs = query.offset(skip).limit(limit).all()
     return {"total": total, "items": jobs}
 
 @app.get("/jobs/{job_id}", response_model=JobSchema)

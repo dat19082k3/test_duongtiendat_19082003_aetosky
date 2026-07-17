@@ -28,9 +28,13 @@ export const getJobs = async (
   limit = 100, 
   status = 'all',
   startDate?: string,
-  endDate?: string
+  endDate?: string,
+  sortBy?: string | null,
+  sortOrder?: string | null
 ): Promise<PaginatedJobs> => {
   const params: any = { skip, limit, status };
+  if (sortBy) params.sort_by = sortBy;
+  if (sortOrder) params.sort_order = sortOrder;
   if (startDate) params.start_date = startDate;
   if (endDate) params.end_date = endDate;
 
