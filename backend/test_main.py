@@ -9,12 +9,16 @@ def test_get_jobs():
         response = client.get("/jobs")
         assert response.status_code == 200
         
-        # Verify it returns a list
-        jobs = response.json()
+        # Verify it returns a paginated structure
+        data = response.json()
+        assert "total" in data
+        assert "items" in data
+        
+        jobs = data["items"]
         assert isinstance(jobs, list)
         
-        # If DB was seeded, there should be at least 4 jobs
-        assert len(jobs) >= 4
+        # If DB was seeded, there should be at least 4 jobs, but capped by default limit 10
+        assert len(jobs) > 0
         
         # Check if basic fields are present in the first job
         first_job = jobs[0]

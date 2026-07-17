@@ -19,18 +19,17 @@ test.describe('Job List/Detail Flow', () => {
     await firstViewBtn.waitFor({ state: 'visible' });
     await firstViewBtn.click();
 
-    // Verify the Drawer opens
-    const drawer = page.locator('.ant-drawer-content');
-    await expect(drawer).toBeVisible({ timeout: 15000 });
+    // Verify page navigated to detail view
+    await expect(page).toHaveURL(/\/jobs\/.+/);
 
-    // Verify basic info in drawer
+    // Verify basic info in detail page
     await expect(page.getByText('Job Details:')).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Status')).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Created At')).toBeVisible({ timeout: 15000 });
 
-    // Close the drawer
-    const closeBtn = page.locator('.ant-drawer-close');
-    await closeBtn.click();
-    await expect(drawer).toBeHidden();
+    // Go back using the Back button (using LeftOutlined icon button)
+    const backBtn = page.getByRole('button').first();
+    await backBtn.click();
+    await expect(page).toHaveURL(/\/jobs/);
   });
 });

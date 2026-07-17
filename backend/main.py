@@ -61,10 +61,19 @@ def seed_data():
     finally:
         db.close()
 
-@app.get("/jobs", response_model=List[JobSchema])
-def get_jobs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    jobs = db.query(models.Job).order_by(models.Job.created_at.desc()).offset(skip).limit(limit).all()
-    return jobs
+class PaginatedJobs(BaseModel):
+    total: int
+    items: List[JobSchema]
+
+@app.get("/jobs", response_model=PaginatedJobs)
+def get_jobs(skip: int = 0, limit: int = 10, status: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(models.Job)
+    if status and status.lower() != 'all':
+        query = query.filter(models.Job.status == status.lower())
+    
+    total = query.count()
+    jobs = query.order_by(models.Job.created_at.desc()).offset(skip).limit(limit).all()
+    return {"total": total, "items": jobs}
 
 @app.get("/jobs/{job_id}", response_model=JobSchema)
 def get_job(job_id: str, db: Session = Depends(get_db)):

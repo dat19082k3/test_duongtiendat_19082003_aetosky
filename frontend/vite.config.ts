@@ -6,13 +6,12 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    proxy: {
-      '/jobs': 'http://127.0.0.1:8080'
-    }
+    port: 5173
   },
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
+    exclude: ['e2e/**/*', 'node_modules/**/*'],
   }
 })
