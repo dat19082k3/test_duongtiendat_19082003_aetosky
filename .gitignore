@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+backend/venv/
+venv/
+.venv/
+env/
+ENV/
+
+# Build & outputs
+dist/
+dist-ssr/
+build/
+out/
+.vercel
+
+# Python cache & compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Environments & sensitive data
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Documents and binaries
+*.pdf
+
+# IDEs/Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.bak
